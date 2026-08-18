@@ -1,0 +1,62 @@
+# SMARTPROMARCO Gobernanza — dependencias del PoC
+# Instalar: pip install -r requirements.txt --break-system-packages (si aplica)
+
+# ── Web framework ────────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# ── ORM + validación (SQLModel unifica Pydantic + SQLAlchemy) ─
+sqlmodel==0.0.22
+sqlalchemy==2.0.36
+alembic==1.14.0
+psycopg[binary]==3.2.3
+
+# ── Configuración ────────────────────────────────────────────
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# ── Seguridad: JWT, MFA, hashing ─────────────────────────────
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+# ⚠️ bcrypt debe fijarse en <4.1 — passlib 1.7.4 no reconoce bcrypt>=4.1
+# (rompe la autodetección de versión y hace fallar hash_password())
+pyotp==2.9.0
+
+# ── Cache / Pub-Sub (alertas del orquestador) ────────────────
+redis==5.2.1
+
+# ── IA: LangGraph + LangChain + Bedrock ──────────────────────
+langgraph==0.2.60
+langchain-core==0.3.28
+langchain-aws==0.2.10
+boto3>=1.35.74
+
+# ── Dashboard ─────────────────────────────────────────────────
+streamlit==1.60.0
+requests==2.33.1
+pandas==2.2.3
+plotly==5.24.1
+
+# ── Testing ───────────────────────────────────────────────────
+pytest==8.3.4
+pytest-cov==6.0.0
+pytest-asyncio==0.25.0
+httpx==0.28.1
+
+# ── Utilidades ────────────────────────────────────────────────
+python-dotenv==1.0.1
+orjson==3.10.12
+tenacity==9.0.0
+openpyxl==3.1.5
+
+# ── Trazabilidad QR (ISO/IEC 18004) — Módulo 3.5 ────────────
+qrcode==8.2
+pillow==11.1.0
+
+# ── Preparado para Fase 3+ (no activo en PoC — ver ADR-001) ──
+# qdrant-client==1.12.1
+# minio==7.2.13
+# prometheus-client==0.21.1
+# ollama==0.4.4
