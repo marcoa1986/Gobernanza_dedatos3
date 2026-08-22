@@ -37,3 +37,9 @@ def get_session() -> Iterator[Session]:
     """Dependencia FastAPI: una sesión por request, se cierra sola."""
     with Session(engine) as session:
         yield session
+
+        # Asegúrate de que la contraseña aquí sea admin123
+SQLALCHEMY_DATABASE_URL = "postgresql+psycopg://smartpromarco:admin123@127.0.0.1:5432/smartpromarco_db"
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# ... el resto de tu código con SQLModel se queda igual ...

@@ -1,0 +1,4 @@
+﻿folio,proveedor,cotizacion,orden_compra,surtido_almacen,factura_vs_oc,datos_bancarios,fecha_surtido,estatus_general,fecha_pago_estimada,observaciones
+OC-2026-0001,Ferretería Industrial SA,Sí,Sí,Sí,Sí,Sí,2026-08-10,VALIDADO,2026-08-12,Ejemplo: proceso completo
+OC-2026-0002,Suministros del Norte,Sí,Sí,No,Pendiente,Sí,,RECHAZADO,,Ejemplo: Almacén no confirmó surtido
+OC-2026-0003,Herramientas MX,Sí,Sí,Sí,Pendiente,Pendiente,2026-08-12,EN_PROCESO,,Ejemplo: esperando factura y pagos
