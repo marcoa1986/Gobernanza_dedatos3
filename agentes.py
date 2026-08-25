@@ -1,95 +1,139 @@
-from typing import TypedDict, Dict, Any
-from langgraph.graph import StateGraph, END
 import json
+import os
+from typing import TypedDict, Dict, Any, Optional, List
+from langgraph.graph import StateGraph, END
 
-class AgentState(TypedDict):
+# ==========================================
+# 1. DEFINICIÓN DEL ESTADO DEL GRAFO
+# ==========================================
+class EstadoCompra(TypedDict):
     folio_compra: str
-    datos_compra: Dict[str, Any]
+    datos_compra: Dict[str, Any]       
+    reglas_negocio: Optional[Dict]     
+    politicas_iso: Optional[Dict]      
     decision_protagonista: str
-    observaciones_protagonista: str
-    auditoria_antagonista: str
-    bandera_roja: bool
-    decision_final_humano: str
+    dictamen_auditor: str
+    requiere_hitl: bool
+    alertas_hitl: List[str]
 
-def nodo_protagonista(state: AgentState):
-    print(f"[Protagonista] Evaluando compra: {state.get('folio_compra')}")
-    datos = state.get("datos_compra", {})
+# ==========================================
+# 2. FUNCIONES DE LOS NODOS DEL GRAFO
+# ==========================================
+
+def nodo_cargar_gobernanza(state: EstadoCompra):
+    """Nodo 1: Lee las reglas físicas de disco y las inyecta al estado."""
+    try:
+        with open("business_rules.json", "r", encoding="utf-8") as f:
+            reglas = json.load(f)
+        with open("policies.json", "r", encoding="utf-8") as f:
+            politicas = json.load(f)
+    except FileNotFoundError:
+        print("⚠️ Advertencia: Archivos JSON de gobernanza no encontrados.")
+        reglas, politicas = {}, {} 
+        
+    return {"reglas_negocio": reglas, "politicas_iso": politicas, "alertas_hitl": []}
+
+
+def nodo_protagonista_decisor(state: EstadoCompra):
+    """Nodo 2: Agente que toma la decisión primaria (Aprobar/Retener)."""
+    datos = state["datos_compra"]
+    qr_payload = datos.get("qr_payload")
     
-    if datos.get("factura_vs_oc") == "Pendiente":
-        decision = "Retener Pago"
-        obs = "Falta validar factura contra orden de compra."
+    # Simulación de evaluación basada en reglas
+    if qr_payload and datos.get("surtido_almacen") == "Completo":
+        decision = "APROBAR"
     else:
-        decision = "Aprobar Pago"
-        obs = "Documentacion aparentemente completa."
+        decision = "RETENER"
+    
+    return {"decision_protagonista": decision}
+
+
+def nodo_antagonista_auditor(state: EstadoCompra):
+    """
+    Nodo 3: Agente Auditor. 
+    Cruza los datos de la compra con las políticas exactas de policies.json 
+    para determinar si se dispara el HITL.
+    """
+    decision_previa = state["decision_protagonista"]
+    datos = state["datos_compra"]
+    qr_payload = datos.get("qr_payload")
+    alertas = state.get("alertas_hitl", [])
+    
+    # 1. Extraer las políticas de gobernanza cargadas en el Nodo 1
+    politicas_iso = state.get("politicas_iso", {}).get("politicas_gobernanza_iso20000", {})
+    condiciones_hitl = politicas_iso.get("requiere_revision_humana_si", {})
+    
+    requiere_hitl = False
+    
+    # 2. Evaluar dinámicamente según lo que dicta policies.json
+    if condiciones_hitl.get("surtido_almacen_incompleto") and datos.get("surtido_almacen") == "Parcial":
+        requiere_hitl = True
+        alertas.append("- INFRACCIÓN ISO 20000: El surtido es 'Parcial'. Se requiere revisión manual.")
         
+    if condiciones_hitl.get("qr_invalido") and (not qr_payload or qr_payload == "NO_QR"):
+        requiere_hitl = True
+        alertas.append("- INFRACCIÓN ISO 18004: Falla de trazabilidad. Código QR ausente o corrupto.")
+        
+    if condiciones_hitl.get("decision_previa_retenida") and decision_previa == "RETENER":
+        requiere_hitl = True
+        alertas.append("- ALERTA INTERNA: El Agente Decisor retuvo la orden preventiva. Auditar.")
+
+    # 3. Emitir dictamen
+    dictamen = "Revisión manual requerida (HITL)" if requiere_hitl else "Auditoría superada exitosamente."
+    
     return {
-        "decision_protagonista": decision,
-        "observaciones_protagonista": obs
+        "dictamen_auditor": dictamen,
+        "requiere_hitl": requiere_hitl,
+        "alertas_hitl": alertas
     }
 
-def nodo_antagonista(state: AgentState):
-    print("[Antagonista] Auditando decision del protagonista...")
-    decision_prota = state.get("decision_protagonista")
-    datos = state.get("datos_compra", {})
-    
-    bandera_roja = False
-    auditoria = "Auditoria superada sin observaciones."
-    
-    if decision_prota == "Aprobar Pago" and datos.get("surtido_almacen") != "Completo":
-        bandera_roja = True
-        auditoria = "ALERTA RIESGO: El protagonista aprobo el pago, pero el almacen reporta surtido parcial."
-        
-    return {
-        "auditoria_antagonista": auditoria,
-        "bandera_roja": bandera_roja
-    }
 
-def requiere_humano(state: AgentState):
-    if state.get("bandera_roja"):
-        print("[Sistema] Bandera roja detectada por el Auditor. Interrumpiendo para revision del Human-in-the-loop.")
-        return "revision_humana"
-    print("[Sistema] Todo en orden. Flujo autorizado.")
+def nodo_notificar_hitl(state: EstadoCompra):
+    """Nodo 4: Disparador de Alertas. Solo se ejecuta si requiere_hitl == True."""
+    print("\n" + "!"*60)
+    print(" 🚨 ALERTA MULTI-AGENTE: INTERVENCIÓN HUMANA REQUERIDA (HITL) 🚨")
+    print(f" Folio afectado: {state.get('folio_compra')}")
+    print(" Motivos detectados por el Antagonista:")
+    for alerta in state.get("alertas_hitl", []):
+        print(f"  {alerta}")
+    print("!"*60 + "\n")
+    
+    return {}
+
+# ==========================================
+# 3. LÓGICA DE ENRUTAMIENTO CONDICIONAL
+# ==========================================
+def ruta_auditoria(state: EstadoCompra):
+    """Dirige el tráfico del grafo dependiendo del dictamen del auditor."""
+    if state.get("requiere_hitl"):
+        return "ir_a_hitl"
     return "fin"
 
-def nodo_humano(state: AgentState):
-    print("[Humano] Revisando discrepancia en la consola...")
-    decision_humana = state.get("decision_final_humano", "Pago Rechazado Manualmente - Requiere Aclaracion")
-    return {"decision_final_humano": decision_humana}
+# ==========================================
+# 4. CONSTRUCCIÓN DEL GRAFO
+# ==========================================
+workflow = StateGraph(EstadoCompra)
 
-workflow = StateGraph(AgentState)
+workflow.add_node("cargar_gobernanza", nodo_cargar_gobernanza)
+workflow.add_node("protagonista", nodo_protagonista_decisor)
+workflow.add_node("antagonista", nodo_antagonista_auditor)
+workflow.add_node("notificar_hitl", nodo_notificar_hitl)
 
-workflow.add_node("protagonista", nodo_protagonista)
-workflow.add_node("antagonista", nodo_antagonista)
-workflow.add_node("revision_humana", nodo_humano)
-
-workflow.set_entry_point("protagonista")
+workflow.set_entry_point("cargar_gobernanza")
+workflow.add_edge("cargar_gobernanza", "protagonista")
 workflow.add_edge("protagonista", "antagonista")
 
+# Desvío condicional hacia HITL
 workflow.add_conditional_edges(
     "antagonista",
-    requiere_humano,
+    ruta_auditoria,
     {
-        "revision_humana": "revision_humana",
+        "ir_a_hitl": "notificar_hitl",
         "fin": END
     }
 )
 
-workflow.add_edge("revision_humana", END)
+workflow.add_edge("notificar_hitl", END)
 
+# Compilación final
 app = workflow.compile()
-
-if __name__ == "__main__":
-    estado_inicial = {
-        "folio_compra": "OC-2026-001",
-        "datos_compra": {
-            "factura_vs_oc": "Recibida",
-            "surtido_almacen": "Parcial",
-            "proveedor": "Proveedor Quimico Industrial"
-        }
-    }
-    
-    print("Iniciando flujo multi-agente para SMARTPROMARCO...\n")
-    resultado = app.invoke(estado_inicial)
-    
-    print("\nResultado Final del Estado en Memoria:")
-    print(json.dumps(resultado, indent=2, ensure_ascii=False))

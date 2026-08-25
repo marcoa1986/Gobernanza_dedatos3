@@ -1,0 +1,40 @@
+{
+  "matriz_validacion_compras": {
+    "fase_1_solicitud": {
+      "actor": "Solicitante",
+      "evidencia_requerida": "Formato de Solicitud Inicial",
+      "estatus_fallo": "RECHAZADO - Datos Incompletos"
+    },
+    "fase_2_cotizacion": {
+      "actor": "Compras",
+      "evidencia_requerida": "Cotización formal del proveedor",
+      "estatus_fallo": "RECHAZADO - Sin Cotización"
+    },
+    "fase_3_generacion_oc": {
+      "actor": "Compras",
+      "evidencia_requerida": "Orden de Compra (OC) Autorizada",
+      "estatus_fallo": "RECHAZADO - Sin OC"
+    },
+    "fase_4_surtido_recepcion": {
+      "actor": "Almacén",
+      "evidencia_requerida": "Archivo o correo de confirmación de Almacén",
+      "estatus_fallo": "RECHAZADO - Sin Evidencia de Surtido"
+    },
+    "fase_5_facturacion": {
+      "actor": "Proveedor / Cuentas por Pagar",
+      "evidencia_requerida": "Factura (XML/PDF) vinculada a la OC",
+      "estatus_fallo": "RECHAZADO - Discrepancia en Factura"
+    },
+    "fase_6_verificacion_bancaria": {
+      "actor": "Pagos",
+      "evidencia_requerida": "Expediente y Alta en Base de Datos",
+      "estatus_fallo": "RECHAZADO - Proveedor Inválido"
+    },
+    "fase_7_simulacion_pago": {
+      "actor": "Pagos",
+      "evidencia_requerida": "Expediente Integral Completo",
+      "estatus_exito": "PAGO PROGRAMADO (T+2)",
+      "estatus_fallo": "RECHAZADO - Expediente Incompleto"
+    }
+  }
+}
