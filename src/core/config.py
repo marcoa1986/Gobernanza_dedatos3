@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # ── Base de datos ────────────────────────────────────────
-    database_url: str = "postgresql+psycopg://smartpromarco:smartpromarco@localhost:5432/smartpromarco"
+    database_url: str = "postgresql+psycopg://smartpromarco:smartpromarco@smartpromarco-postgres:5432/smartpromarco"
     database_echo: bool = False
 
     # ── Redis (pub/sub de alertas del orquestador) ──────────

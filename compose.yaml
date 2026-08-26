@@ -34,7 +34,7 @@ services:
     networks:
       - app-network
 
-  api:
+  smartpromarco-gobernanza-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -45,12 +45,12 @@ services:
     env_file:
       - .env
     environment:
-      - PYTHONPATH=/app
+      - PYTHONPATH=/app:/app/src
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-smartpromarco}
       - REDIS_URL=redis://redis:6379
     volumes:
       - ./src:/app/src
-      - ./api_main.py:/app/api_main.py
+      - ./main.py:/app/main.py
     depends_on:
       - postgres
       - redis

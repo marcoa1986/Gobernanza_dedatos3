@@ -8,14 +8,6 @@ from sqlalchemy.orm import Session
 from database import engine, get_db, Base
 from models import MatrizValidacionCompras 
 from agentes import app as workflow_agentes
-from fastapi import FastAPI
-
-app = FastAPI()
-
-# Agrega este endpoint
-@app.get("/health", tags=["Monitoreo"])
-async def health_check():
-    return {"status": "ok", "message": "API operativa"}
 
 # ==========================================
 # CREACIÓN AUTOMÁTICA DE TABLAS AL ARRANCAR
