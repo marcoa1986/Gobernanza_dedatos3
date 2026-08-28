@@ -1,40 +1,52 @@
 {
-  "matriz_validacion_compras": {
-    "fase_1_solicitud": {
-      "actor": "Solicitante",
-      "evidencia_requerida": "Formato de Solicitud Inicial",
-      "estatus_fallo": "RECHAZADO - Datos Incompletos"
-    },
-    "fase_2_cotizacion": {
-      "actor": "Compras",
-      "evidencia_requerida": "Cotización formal del proveedor",
-      "estatus_fallo": "RECHAZADO - Sin Cotización"
-    },
-    "fase_3_generacion_oc": {
-      "actor": "Compras",
-      "evidencia_requerida": "Orden de Compra (OC) Autorizada",
-      "estatus_fallo": "RECHAZADO - Sin OC"
-    },
-    "fase_4_surtido_recepcion": {
-      "actor": "Almacén",
-      "evidencia_requerida": "Archivo o correo de confirmación de Almacén",
-      "estatus_fallo": "RECHAZADO - Sin Evidencia de Surtido"
-    },
-    "fase_5_facturacion": {
-      "actor": "Proveedor / Cuentas por Pagar",
-      "evidencia_requerida": "Factura (XML/PDF) vinculada a la OC",
-      "estatus_fallo": "RECHAZADO - Discrepancia en Factura"
-    },
-    "fase_6_verificacion_bancaria": {
-      "actor": "Pagos",
-      "evidencia_requerida": "Expediente y Alta en Base de Datos",
-      "estatus_fallo": "RECHAZADO - Proveedor Inválido"
-    },
-    "fase_7_simulacion_pago": {
-      "actor": "Pagos",
-      "evidencia_requerida": "Expediente Integral Completo",
-      "estatus_exito": "PAGO PROGRAMADO (T+2)",
-      "estatus_fallo": "RECHAZADO - Expediente Incompleto"
-    }
-  }
+    "system": "SMARTPROMARCO PoC",
+    "module": "matriz_validacion_compras",
+    "version": "1.0",
+    "rules": [
+        {
+            "id": "BR-001",
+            "name": "Aprobación de Compras y Umbrales (HITL)",
+            "description": "Reglas para determinar si una decisión es autónoma o requiere intervención humana.",
+            "conditions": {
+                "auto_approval": "risk_level == 'LOW' AND amount <= 50000",
+                "human_in_the_loop_required": "risk_level == 'HIGH' OR amount > 50000 OR anomaly_detected == true"
+            },
+            "actions": {
+                "on_auto_approval": "generate_approval_uuid",
+                "on_human_in_the_loop": "escalate_to_human_reviewer"
+            }
+        },
+        {
+            "id": "BR-002",
+            "name": "Validación de Auditor Antagonista (LangGraph)",
+            "description": "El Agente Auditor debe refutar o validar la decisión del Agente Decisor Protagonista.",
+            "conditions": {
+                "trigger": "decisor_agent_status == 'PROPOSED'",
+                "rejection_criteria": [
+                    "falta_evidencia_documental",
+                    "incumplimiento_criterios_calidad",
+                    "sesgo_detectado_en_decisor"
+                ]
+            },
+            "actions": {
+                "on_rejection": "return_to_decisor_with_feedback",
+                "on_validation": "proceed_to_final_approval"
+            }
+        },
+        {
+            "id": "BR-003",
+            "name": "Trazabilidad Documental por QR",
+            "description": "Asignación obligatoria de UUID para la trazabilidad de documentos generados.",
+            "conditions": {
+                "trigger": "document_status == 'FINALIZED'"
+            },
+            "actions": {
+                "execute": [
+                    "generate_uuid",
+                    "embed_uuid_in_qr_code",
+                    "save_to_database"
+                ]
+            }
+        }
+    ]
 }

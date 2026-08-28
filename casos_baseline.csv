@@ -1,0 +1,11 @@
+id_caso,entrada_producto,volumen,proveedor,precio_ofertado,analisis_humano_previo,decision_actual,resultado_esperado
+CASO-01,Alcohol Isopropílico,200_LITROS,Diquimex,4500,"Precio dentro de mercado, proveedor con ISO",APROBAR,Compra automatizada sin HITL
+CASO-02,Solvente Dieléctrico,5000_LITROS,CICTECH,125000,"Volumen alto, excede umbral de $50k",REVISAR,Escalar a revisión humana (HITL)
+CASO-03,Monoetilenglicol,200_LITROS,Proveedor Desconocido,3000,"Precio sospechosamente bajo, sin historial",RECHAZAR,Bloqueo por riesgo de calidad
+CASO-04,Xileno,5000_LITROS,Quiman,110000,Falta certificado de calidad en lote,REVISAR,Auditor solicita documentos faltantes
+CASO-05,Thinners,200_LITROS,Alcohol Imagen,4200,"Proveedor habitual, precio estable",APROBAR,Compra automatizada
+CASO-06,Acetatos,200_LITROS,Diquimex,5100,Límites de crédito al máximo con el proveedor,RECHAZAR,Bloqueo financiero por Auditor
+CASO-07,Alcohol Isopropílico,5000_LITROS,Productos Químicos KR,115000,Requiere visto bueno de dirección,REVISAR,Generar UUID y enviar a HOTL
+CASO-08,Solvente Dieléctrico,200_LITROS,CICTECH,4800,"Documentación completa, QR validado",APROBAR,Aprobación directa del Decisor
+CASO-09,Xileno,200_LITROS,Quiman,5000,"Ligero retraso en última entrega, riesgo bajo",APROBAR,Aprobación con nota de advertencia
+CASO-10,Monoetilenglicol,5000_LITROS,Diquimex,140000,Variación de precio mayor al 15% vs mes anterior,REVISAR,Auditor detiene para justificación de mercado

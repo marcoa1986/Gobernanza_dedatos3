@@ -1,11 +1,40 @@
 {
-  "politicas_gobernanza_iso20000": {
-    "nivel_sla_segundos": 3.0,
-    "requiere_revision_humana_si": {
-      "surtido_almacen_incompleto": true,
-      "excede_umbral_monto": true,
-      "qr_invalido": true,
-      "decision_previa_retenida": true
-    }
-  }
+    "system": "SMARTPROMARCO PoC",
+    "domain": "gobernanza_y_calidad",
+    "version": "1.0",
+    "policies": [
+        {
+            "policy_id": "POL-001",
+            "name": "Cumplimiento de Calidad de Software (ISO/IEC 25010)",
+            "description": "Todos los módulos deben cumplir con métricas de adecuación funcional, fiabilidad, usabilidad y seguridad de la información.",
+            "enforcement_level": "STRICT"
+        },
+        {
+            "policy_id": "POL-002",
+            "name": "Gobernanza Multi-Tenant",
+            "description": "Aislamiento estricto de datos. Un tenant (cliente) no puede acceder a los datos, métricas ni decisiones de otro tenant.",
+            "enforcement_level": "STRICT",
+            "validation": "tenant_id_match_required"
+        },
+        {
+            "policy_id": "POL-003",
+            "name": "Retención y Trazabilidad de Auditoría (AWS)",
+            "description": "Todas las decisiones de los agentes (Decisor y Auditor) deben quedar registradas de forma inmutable.",
+            "storage_requirements": [
+                "amazon_s3_archiving",
+                "cloudwatch_logging"
+            ],
+            "retention_period_days": 365
+        },
+        {
+            "policy_id": "POL-004",
+            "name": "Revisión Humana Continua (HITL, HOTL, HOOTL)",
+            "description": "Políticas de intervención humana en el ciclo de vida del agente para prevenir alucinaciones o decisiones perjudiciales.",
+            "frameworks_applied": [
+                "Human-in-the-loop (Aprobación requerida antes de actuar)",
+                "Human-on-the-loop (Monitoreo con capacidad de anular)",
+                "Human-out-of-the-loop (Automatización total solo para nivel de riesgo nulo)"
+            ]
+        }
+    ]
 }

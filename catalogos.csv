@@ -1,0 +1,8 @@
+id_catalogo,categoria,valor,descripcion
+CAT-001,PRODUCTO,Alcohol Isopropílico,Solvente industrial grado técnico
+CAT-002,PRODUCTO,Solvente Dieléctrico,Limpiador de componentes eléctricos
+CAT-003,PRODUCTO,Monoetilenglicol,Anticongelante y refrigerante
+CAT-004,PROVEEDOR,Diquimex,Distribuidor nacional autorizado
+CAT-005,PROVEEDOR,Productos Químicos y Mezclas KR,Proveedor regional
+CAT-006,VOLUMEN,200_LITROS,Tambor estándar
+CAT-007,VOLUMEN,5000_LITROS,Pipa consolidada
